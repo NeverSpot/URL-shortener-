@@ -42,7 +42,13 @@ export class UrlService implements IUrlService{
             let longUrl=await this.repo.get(shortUrl);
 
             // Repo cache HIT
-            if(longUrl!==null)return longUrl;
+            if(longUrl!==null){
+                // add to Redis
+                await this.redis.push(longUrl,shortUrl);
+
+                // Return the LongUrl
+                return longUrl;
+            }
         }catch (error){
             console.log("Error while find Url in Repo \n",error);
         }
