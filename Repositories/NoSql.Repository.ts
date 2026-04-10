@@ -1,32 +1,36 @@
 import type {IUrlRepository} from "../Interfaces/IUrlRepository.js";
 import {inject, injectable} from "tsyringe";
-import MongoDbClient from "../config/mongoDb.Client.js";
-
+import {MongoDb} from "../config/mongoDb.Client.js";
+import {UrlDocument} from "../Models/Url.js";
 
 @injectable()
 export class NoSqlRepository implements IUrlRepository{
-
+    private readonly mongo;  // ← sirf class ke andar
     constructor(
-        @inject(MongoDbClient) private mongo: MongoDbClient
+        @inject(MongoDb) mongoClient: MongoDb
     ){
-
+        this.mongo = mongoClient.getCollection();
     }
 
     async get(shortUrl: string): Promise<string | null> {
+
         try {
-            return "";
-            // return await this.mongo.get(shortUrl);
+            const longUrl=await this.mongo.findOne({shortUrl});
+            if(longUrl===null)return null;
+            return longUrl.longUrl;
         }catch (error){
-            console.log("Redis get failed",error);
+            console.log(`Database get failed ${error}`);
             throw error;
         }
+
     }
 
     async push(longUrl:string,shortUrl:string):Promise<void>{
         try {
-            // await this.mongo.set(url.getShortUrl(),url.getOriginalUrl());
+            const newUrl=new UrlDocument(longUrl,shortUrl);
+            await this.mongo.insertOne(newUrl);
         }catch (error){
-            console.log("Redis set failed",error);
+            console.log(`Database push failed ${error}`);
             throw error;
         }
     }

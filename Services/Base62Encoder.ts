@@ -1,18 +1,11 @@
 import type {IUrlEncoder} from "../Interfaces/IUrlEncoder.js";
-import {inject, injectable} from "tsyringe";
-import {RedisClient} from "../config/redis.Client.js";
+import {injectable} from "tsyringe";
 
 
 @injectable()
 export class Base62Encoder implements IUrlEncoder{
 
-    redis;
-    constructor(
-        @inject(RedisClient) private redisClient: RedisClient
-    ) {
-        this.redis=this.redisClient.getClient();
-    }
-    mapping="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890";
+    private readonly mapping="qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890";
 
     async getShortUrl(key:number): Promise<string> {
         let shortUrl="";

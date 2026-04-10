@@ -14,46 +14,50 @@ export class UrlService implements IUrlService{
         console.log("UrlService created");
     }
 
-    async addUrl(longUrl: string): Promise<string> {
+    async addUrl(longUrl: string): Promise<string|null> {
         let key=await this.redis.getLatestNumber();
         const shortUrl=await this.encoder.getShortUrl(key);
 
         // add to dataBase
-        await this.redis.push(longUrl,shortUrl);
-        await this.repo.push(longUrl,shortUrl);
+        try{
+            await this.repo.push(longUrl,shortUrl);
+            await this.redis.push(longUrl,shortUrl);
+        }catch (e){
+            console.log(e);
+            return null;
+        }
 
         return shortUrl;
     }
 
-     async getLongUrl(shortUrl: string): Promise<string> {
+     async getLongUrl(shortUrl: string): Promise<string|null> {
 
         try{
             // try to find in Redis
-            let longUrl=await this.redis.get(shortUrl);
+            const cached =await this.redis.get(shortUrl);
 
             // redis cache HIT, direct yahi se send krdo
-            if(longUrl!==null)return longUrl;
+            if(cached !==null)return cached ;
         }catch (error){
             console.log("Error while find Url in Redis \n",error);
         }
 
+
         try{
             // Cache Miss lets find in DataBase
-            let longUrl=await this.repo.get(shortUrl);
+            const longUrl=await this.repo.get(shortUrl);
 
             // Repo cache HIT
             if(longUrl!==null){
                 // add to Redis
                 await this.redis.push(longUrl,shortUrl);
-
-                // Return the LongUrl
-                return longUrl;
             }
+            return longUrl;
+
         }catch (error){
             console.log("Error while find Url in Repo \n",error);
+            return null;
         }
-
-         return "notFound.com";
      }
 
 

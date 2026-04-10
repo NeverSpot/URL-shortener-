@@ -4,10 +4,10 @@ import { UrlService} from "./Services/Url.Service.js";
 import {RedisCache} from "./Repositories/RedisCache.js";
 import {NoSqlRepository} from "./Repositories/NoSql.Repository.js";
 import {RedisClient} from "./config/redis.Client.ts";
-import MongoDbClient from "./config/mongoDb.Client.ts";
+import {MongoDb} from "./config/mongoDb.Client.ts";
 
 container.registerSingleton(RedisClient);
-container.registerSingleton(MongoDbClient);
+container.registerSingleton(MongoDb);
 
 container.register("IUrlService",{useClass:UrlService});
 container.register("IUrlRepository",{useClass:NoSqlRepository});

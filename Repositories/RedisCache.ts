@@ -4,11 +4,11 @@ import {RedisClient} from "../config/redis.Client.js";
 
 @injectable()
 export class RedisCache implements IRedisCache{
-    redis;
+    private readonly redis;
     constructor(
-        @inject(RedisClient) private redisClient: RedisClient
+        @inject(RedisClient) redisClient: RedisClient
     ) {
-        this.redis=this.redisClient.getClient();
+        this.redis=redisClient.getClient();
     }
 
     async get(shortUrl: string): Promise<string | null> {

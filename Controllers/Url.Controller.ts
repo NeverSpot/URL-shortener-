@@ -1,8 +1,10 @@
 import type {Request, Response} from 'express';
 import type {IUrlService} from "../Interfaces/IUrlService.js";
 import {injectable,inject} from "tsyringe";
+import { z } from "zod";
 
 
+const UrlSchema=z.object({longUrl:z.url()})
 
 @injectable()
 export class UrlController{
@@ -14,13 +16,19 @@ export class UrlController{
     }
 
     async write(req:Request,res:Response){
-        const { longUrl } = req.body;
-        if(typeof longUrl!=="string"){
-            res.status(422).send("Invalid Url");
+        const result = UrlSchema.safeParse(req.body);
+
+        if (!result.success) {
+            res.status(422).send("Invalid URL");
             return;
         }
-        const shortUrl=await this.urlService.addUrl(longUrl);
-        res.status(201).json({ shortUrl });
+        const longUrl  =result.data.longUrl;
+        try {
+            const shortUrl = await this.urlService.addUrl(longUrl);
+            res.status(201).json({ shortUrl });
+        } catch (e) {
+            res.status(500).json({ error: "Something went wrong!" });
+        }
     }
 
     async read(req:Request,res:Response){
@@ -30,7 +38,11 @@ export class UrlController{
             return;
         }
         const longUrl=await this.urlService.getLongUrl(shortUrl);
-        res.status(200).redirect(longUrl);
+        if (longUrl != null) {
+            res.status(200).redirect(longUrl);
+        }else{
+            res.status(404).send("URL NOT FOUND")
+        }
     }
 
 }

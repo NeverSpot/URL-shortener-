@@ -1,12 +1,17 @@
-import mongoose, { Schema } from 'mongoose';
+import {ObjectId} from "mongodb";
 
-interface IUrl{
-    shortUrl:string;
-    longUrl:string;
+export interface IUrl {
+    _id?: ObjectId;
+    longUrl: string;
+    shortUrl: string;
+    createdAt: Date;
 }
-const UrlSchema=new Schema<IUrl>({
-    shortUrl:{type:"string", required:true, unique:true},
-    longUrl:{type:"string",required:true}
-})
 
-export default mongoose.model<IUrl>('Url', UrlSchema);
+export class UrlDocument implements IUrl {
+    _id?: ObjectId;
+    createdAt:Date;
+    constructor(public longUrl: string,public shortUrl: string) {
+        this.createdAt=new Date();
+    }
+}
+
