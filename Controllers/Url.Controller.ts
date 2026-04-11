@@ -25,10 +25,10 @@ export class UrlController{
         const longUrl  =result.data.longUrl;
         try {
             const shortUrl = await this.urlService.addUrl(longUrl);
-            if(shortUrl===null)res.status(500).json({ error: "Something went wrong!" });
+            if(shortUrl===null)res.status(500).json({ error: "Short Url is null" });
             else res.status(201).json({ shortUrl });
         } catch (e) {
-            res.status(500).json({ error: "Something went wrong!" });
+            res.status(500).json({ error: "Error creating URL" });
         }
     }
 
