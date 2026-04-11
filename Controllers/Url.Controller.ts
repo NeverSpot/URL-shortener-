@@ -25,7 +25,8 @@ export class UrlController{
         const longUrl  =result.data.longUrl;
         try {
             const shortUrl = await this.urlService.addUrl(longUrl);
-            res.status(201).json({ shortUrl });
+            if(shortUrl===null)res.status(500).json({ error: "Something went wrong!" });
+            else res.status(201).json({ shortUrl });
         } catch (e) {
             res.status(500).json({ error: "Something went wrong!" });
         }
@@ -38,7 +39,7 @@ export class UrlController{
             return;
         }
         const longUrl=await this.urlService.getLongUrl(shortUrl);
-        if (longUrl != null) {
+        if (longUrl !== null) {
             res.status(200).redirect(longUrl);
         }else{
             res.status(404).send("URL NOT FOUND")
