@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapLink | Fast URL Shortener</title>
+    <meta
+        name="description"
+        content="Create short links instantly with a fast URL shortener powered by TypeScript, Express, MongoDB, and Redis."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+    >
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="page-shell">
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-mark"></span>
+            <span>SnapLink</span>
+        </a>
+        <nav class="topbar-links">
+            <a href="#features">Features</a>
+            <a href="#api">API</a>
+            <a href="https://github.com/NeverSpot/URL-shortener-" target="_blank" rel="noreferrer">GitHub</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">TypeScript • Express • MongoDB • Redis</p>
+                <h1>Short links without the usual friction.</h1>
+                <p class="hero-text">
+                    Paste a long URL, generate a compact link, and redirect fast with Redis-backed lookups.
+                    Built as a clean service with layered architecture and dependency injection.
+                </p>
+
+                <div class="hero-metrics">
+                    <div class="metric-card">
+                        <span class="metric-label">API surface</span>
+                        <strong>3 routes</strong>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Validation</span>
+                        <strong>Zod schemas</strong>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Cache layer</span>
+                        <strong>Redis first</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-panel">
+                <section class="shortener-card">
+                    <div class="panel-header">
+                        <p class="panel-kicker">Launch a short link</p>
+                        <h2>Try the live endpoint</h2>
+                    </div>
+
+                    <form id="shortener-form" class="shortener-form">
+                        <label for="longUrl" class="field-label">Long URL</label>
+                        <div class="input-row">
+                            <input
+                                id="longUrl"
+                                name="longUrl"
+                                type="url"
+                                inputmode="url"
+                                placeholder="https://example.com/really/long/path"
+                                required
+                            >
+                            <button id="submit-button" type="submit">Shorten</button>
+                        </div>
+                        <p class="helper-text">The form sends a `POST /` request to the current server.</p>
+                    </form>
+
+                    <div id="message" class="status-message" aria-live="polite"></div>
+
+                    <section id="result" class="result-card" hidden>
+                        <div>
+                            <p class="result-label">Short URL</p>
+                            <a id="short-url-output" href="/" target="_blank" rel="noreferrer"></a>
+                        </div>
+                        <button id="copy-button" type="button" class="secondary-button">Copy link</button>
+                    </section>
+                </section>
+
+                <aside class="signal-card">
+                    <div class="signal-line"></div>
+                    <p class="signal-caption">Redirect flow</p>
+                    <ol>
+                        <li>Validate input URL with Zod</li>
+                        <li>Create a compact code</li>
+                        <li>Cache lookups in Redis</li>
+                        <li>Fallback to MongoDB persistence</li>
+                    </ol>
+                </aside>
+            </div>
+        </section>
+
+        <section id="features" class="content-grid">
+            <article class="info-card accent-card">
+                <p class="card-label">Why it feels fast</p>
+                <h3>Cold data in MongoDB, hot paths in Redis.</h3>
+                <p>
+                    Repeated redirects skip the database whenever the short code is already cached,
+                    reducing latency where it matters.
+                </p>
+            </article>
+
+            <article class="info-card">
+                <p class="card-label">Architecture</p>
+                <h3>Controllers, services, repositories.</h3>
+                <p>
+                    The service is split into clear layers, which keeps the HTTP surface small and the business
+                    logic isolated from storage details.
+                </p>
+            </article>
+
+            <article class="info-card">
+                <p class="card-label">Operational basics</p>
+                <h3>Health checks built in.</h3>
+                <p>
+                    Use <code>/health</code> for uptime monitoring while the main root endpoint stays focused on
+                    shortening links.
+                </p>
+            </article>
+        </section>
+
+        <section id="api" class="api-section">
+            <div class="section-heading">
+                <p class="eyebrow">Minimal API</p>
+                <h2>Everything important fits on one screen.</h2>
+            </div>
+
+            <div class="api-layout">
+                <article class="endpoint-card">
+                    <span class="method post">POST</span>
+                    <div>
+                        <h3>/</h3>
+                        <p>Create a new short code from a valid long URL.</p>
+                    </div>
+                </article>
+
+                <article class="endpoint-card">
+                    <span class="method get">GET</span>
+                    <div>
+                        <h3>/:shortUrl</h3>
+                        <p>Resolve the short code and redirect to the original destination.</p>
+                    </div>
+                </article>
+
+                <article class="endpoint-card">
+                    <span class="method health">GET</span>
+                    <div>
+                        <h3>/health</h3>
+                        <p>Return a simple status payload for monitoring and deployment checks.</p>
+                    </div>
+                </article>
+            </div>
+
+            <pre class="code-block"><code>curl -X POST / \
+  -H "Content-Type: application/json" \
+  -d '{"longUrl":"https://example.com"}'</code></pre>
+        </section>
+    </main>
+</div>
+
+<script src="/app.js" defer></script>
+</body>
+</html>
