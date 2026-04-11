@@ -14,6 +14,7 @@ It creates short codes for long URLs, stores them in MongoDB, and uses Redis to 
 ## What It Does
 
 - Shortens valid URLs
+- Serves a landing page at `/` with an integrated shortener form
 - Redirects short codes to the original URL
 - Exposes a `/health` endpoint for monitoring
 - Uses Redis cache before falling back to MongoDB
@@ -27,6 +28,7 @@ It creates short codes for long URLs, stores them in MongoDB, and uses Redis to 
 
 | Method | Route | Purpose |
 | --- | --- | --- |
+| `GET` | `/` | Landing page with built-in shortener form |
 | `GET` | `/health` | Returns service status |
 | `POST` | `/` | Creates a short URL |
 | `GET` | `/:shortUrl` | Redirects to the original URL |
