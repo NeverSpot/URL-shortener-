@@ -1,66 +1,117 @@
-# URL Shortener
+# 🔗 URL Shortener
 
-A clean URL shortener API built with `TypeScript`, `Express`, `MongoDB`, and `Redis`.
+<p align="center">
+  <a href="https://url-shortener-mhp8.onrender.com/health"><img src="https://img.shields.io/badge/status-live-brightgreen" alt="Live" /></a>
+  <img src="https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/stack-Express%20%7C%20MongoDB%20%7C%20Redis-informational" alt="Stack" />
+  <img src="https://img.shields.io/badge/deploy-Render-purple" alt="Render" />
+  <a href="https://opensource.org/licenses/ISC"><img src="https://img.shields.io/badge/license-ISC-blue" alt="ISC License" /></a>
+</p>
 
-It creates short codes for long URLs, stores them in MongoDB, and uses Redis to speed up repeated lookups.
+A production-ready URL shortener API written in TypeScript. Short codes are generated and persisted in MongoDB; Redis sits in front for cache-first lookups. The project follows a layered architecture with dependency injection via `tsyringe`.
 
-## Live App
+**Live:** https://url-shortener-mhp8.onrender.com
 
-- App: `https://url-shortener-mhp8.onrender.com`
-- Health: `https://url-shortener-mhp8.onrender.com/health`
+---
 
-> Deployed on Render. A 5-minute health ping keeps the service awake and avoids cold starts.
+## Features
 
-## What It Does
+- Shorten any valid URL to a 5-character code
+- Cache-first reads: Redis checked before hitting MongoDB
+- Input validation with [Zod](https://github.com/colinhacks/zod)
+- Dependency injection via [tsyringe](https://github.com/microsoft/tsyringe)
+- `/health` endpoint for uptime monitoring
+- Landing page with a built-in shortener form at `/`
+- Self-healing: a 5-minute health ping prevents Render cold starts
 
-- Shortens valid URLs
-- Serves a landing page at `/` with an integrated shortener form
-- Redirects short codes to the original URL
-- Exposes a `/health` endpoint for monitoring
-- Uses Redis cache before falling back to MongoDB
-- Follows a layered architecture with dependency injection
+---
 
-## Tech Stack
+## API
 
-`Node.js` `TypeScript` `Express` `MongoDB` `Redis` `Zod` `tsyringe`
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/` | Landing page with shortener form |
+| `GET` | `/health` | Service health check |
+| `POST` | `/` | Create a short URL |
+| `GET` | `/:shortCode` | Redirect to the original URL |
 
-## API Overview
+### Create a short URL
 
-| Method | Route | Purpose |
-| --- | --- | --- |
-| `GET` | `/` | Landing page with built-in shortener form |
-| `GET` | `/health` | Returns service status |
-| `POST` | `/` | Creates a short URL |
-| `GET` | `/:shortUrl` | Redirects to the original URL |
-
-### Create Short URL
-
-Request:
-
+**Request:**
 ```json
+POST /
+Content-Type: application/json
+
 {
-  "longUrl": "https://example.com/some/long/path"
+  "longUrl": "https://example.com/some/very/long/path"
 }
 ```
 
-Success response:
-
+**Response `201`:**
 ```json
 {
   "shortUrl": "aB3xZ"
 }
 ```
 
-Common status codes:
+**Status codes:**
 
-- `201` short URL created
-- `422` invalid input
-- `404` short URL not found
-- `500` internal error
+| Code | Meaning |
+|------|---------|
+| `201` | Short URL created |
+| `422` | Validation failed (invalid URL) |
+| `404` | Short code not found |
+| `500` | Internal server error |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Language | TypeScript |
+| Framework | Express |
+| Database | MongoDB (persistent store) |
+| Cache | Redis (cache-first lookup) |
+| Validation | Zod |
+| DI Container | tsyringe |
+| Deploy | Render |
+
+### Request flow
+
+```
+Client
+  │
+  ├─ POST / ──────────────► Controller → Service → Repository
+  │                                                    │
+  │                                               [Redis hit?]
+  │                                                Yes │ No
+  │                                                    │  └─► MongoDB → cache in Redis
+  │                                                    │
+  └─ GET /:code ──────────► Redirect to longUrl ◄──────┘
+```
+
+---
+
+## Project Structure
+
+```
+Controllers/    Request handling and input validation
+Services/       Business logic
+Repositories/   MongoDB and Redis data access
+Interfaces/     Contracts and type definitions
+Models/         Mongoose schemas
+Routes/         Express route definitions
+config/         Database and cache initialization
+container.js    tsyringe dependency injection setup
+index.ts        App entry point
+```
+
+---
 
 ## Quick Start
 
-### 1. Install
+### 1. Clone & Install
 
 ```bash
 git clone https://github.com/NeverSpot/URL-shortener-.git
@@ -68,7 +119,7 @@ cd URL-shortener-
 npm install
 ```
 
-### 2. Add Environment Variables
+### 2. Configure Environment
 
 Create a `.env` file in the project root:
 
@@ -85,47 +136,35 @@ REDIS_PORT=6379
 ### 3. Run
 
 ```bash
+# Build and start
 npm run build
 npm start
-```
 
-For a simple development run:
-
-```bash
+# Development (ts-node / nodemon)
 npm run dev
 ```
 
-Local server: `http://localhost:3001`
+Server runs at `http://localhost:3001`.
 
-## Example Requests
+---
+
+## Try It
 
 Check health:
-
 ```bash
 curl https://url-shortener-mhp8.onrender.com/health
 ```
 
-Create a short URL:
-
+Shorten a URL:
 ```bash
 curl -X POST https://url-shortener-mhp8.onrender.com/ \
   -H "Content-Type: application/json" \
-  -d '{"longUrl":"https://example.com"}'
+  -d '{"longUrl": "https://example.com/some/long/path"}'
 ```
 
-## Project Structure
+Visit `https://url-shortener-mhp8.onrender.com/<shortCode>` to be redirected.
 
-```text
-Controllers/    Request handling and validation
-Services/       Business logic
-Repositories/   MongoDB and Redis access
-Interfaces/     Contracts and abstractions
-Models/         Data models
-Routes/         Route definitions
-config/         Database and cache setup
-container.js    Dependency injection setup
-index.ts        App entry point
-```
+---
 
 ## License
 
